@@ -273,7 +273,8 @@
                 android:text="Сервисы и предложения"
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_services"

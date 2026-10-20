@@ -35,6 +35,7 @@ public class DashboardFragment extends Fragment {
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView rvStories;
     private RecyclerView rvServices;
+    private TextView tvServicesTitle;
 
     private StoriesAdapter storiesAdapter;
     private ServicesAdapter servicesAdapter;
@@ -55,6 +56,7 @@ public class DashboardFragment extends Fragment {
         swipeRefresh = v.findViewById(R.id.swipe_refresh);
         rvStories = v.findViewById(R.id.rv_stories);
         rvServices = v.findViewById(R.id.rv_services);
+        tvServicesTitle = v.findViewById(R.id.tv_services_title);
 
         currentUser = SessionManager.getInstance().getUser();
         updateUserUI();
@@ -167,6 +169,8 @@ public class DashboardFragment extends Fragment {
         ApiClient.getInstance().fetchServices(new ApiClient.ApiCallback<List<BankService>>() {
             @Override
             public void onSuccess(List<BankService> result) {
+                boolean hasServices = result != null && !result.isEmpty();
+                tvServicesTitle.setVisibility(hasServices ? View.VISIBLE : View.GONE);
                 servicesAdapter.setItems(result);
             }
 
