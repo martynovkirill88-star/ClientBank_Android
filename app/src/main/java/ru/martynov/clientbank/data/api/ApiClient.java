@@ -428,4 +428,39 @@ public class ApiClient {
             }
         });
     }
+
+    public void payTerminalSession(String sessionId, int buyerId, ApiCallback<String> callback) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("session_id", sessionId);
+        body.put("buyer_id", buyerId);
+
+        Request req = new Request.Builder()
+                .url(BASE_URL + "/api/terminal/pay")
+                .post(RequestBody.create(gson.toJson(body), JSON_MEDIA))
+                .build();
+
+        httpClient.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                deliverError(callback, "Ошибка сети: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String str = response.body() != null ? response.body().string() : "";
+                    JsonObject obj = gson.fromJson(str, JsonObject.class);
+                    boolean success = obj != null && obj.has("success") && obj.get("success").getAsBoolean();
+                    String msg = obj != null && obj.has("message") ? obj.get("message").getAsString() : "Оплата завершена";
+                    if (success) {
+                        deliverSuccess(callback, msg);
+                    } else {
+                        deliverError(callback, msg);
+                    }
+                } catch (Exception e) {
+                    deliverError(callback, "Ошибка обработки ответа: " + e.getMessage());
+                }
+            }
+        });
+    }
 }

@@ -184,7 +184,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/btn_action_atm"
+                        android:id="@+id/btn_action_pay"
                         android:layout_width="0dp"
                         android:layout_height="48dp"
                         android:layout_weight="1"
@@ -196,14 +196,14 @@
                         <ImageView
                             android:layout_width="18dp"
                             android:layout_height="18dp"
-                            android:src="@drawable/ic_bolt"
+                            android:src="@drawable/ic_qr_code"
                             app:tint="@color/purple_light" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="В банкомат"
+                            android:text="Оплата"
                             android:textColor="@color/purple_light"
                             android:textSize="14sp"
                             android:textStyle="bold" />

@@ -36,6 +36,8 @@ public class RoPayInAppBrowserActivity extends AppCompatActivity {
         String targetUrl = getIntent().getStringExtra("target_url");
         String title = getIntent().getStringExtra("title");
         int userId = getIntent().getIntExtra("user_id", 0);
+        String userName = getIntent().getStringExtra("user_name");
+        String userPhone = getIntent().getStringExtra("user_phone");
 
         if (title != null && !title.isEmpty()) {
             tvTitle.setText(title);
@@ -101,6 +103,13 @@ public class RoPayInAppBrowserActivity extends AppCompatActivity {
         uriBuilder.appendQueryParameter("ropay_inapp", "1");
         if (userId > 0) {
             uriBuilder.appendQueryParameter("uid", String.valueOf(userId));
+            uriBuilder.appendQueryParameter("user_id", String.valueOf(userId));
+        }
+        if (userName != null && !userName.isEmpty()) {
+            uriBuilder.appendQueryParameter("name", userName);
+        }
+        if (userPhone != null && !userPhone.isEmpty()) {
+            uriBuilder.appendQueryParameter("phone", userPhone);
         }
 
         Map<String, String> headers = new HashMap<>();

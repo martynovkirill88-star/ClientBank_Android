@@ -15,6 +15,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 import java.util.ArrayList;
 import java.util.List;
 import ru.martynov.clientbank.R;
@@ -78,6 +80,8 @@ public class DashboardFragment extends Fragment {
             intent.putExtra("target_url", service.targetUrl);
             intent.putExtra("title", service.title);
             intent.putExtra("user_id", currentUser != null ? currentUser.id : 0);
+            intent.putExtra("user_name", currentUser != null && currentUser.name != null ? currentUser.name : "");
+            intent.putExtra("user_phone", currentUser != null && currentUser.phone != null ? currentUser.phone : "");
             startActivity(intent);
         });
         rvServices.setAdapter(servicesAdapter);
@@ -90,12 +94,81 @@ public class DashboardFragment extends Fragment {
             startActivity(intent);
         });
 
-        v.findViewById(R.id.btn_action_atm).setOnClickListener(b -> showBleUpcomingDialog());
+        v.findViewById(R.id.btn_action_pay).setOnClickListener(b -> {
+            IntentIntegrator integrator = IntentIntegrator.forSupportFragment(DashboardFragment.this);
+            integrator.setPrompt("Наведите камеру на QR-код терминала RoPay");
+            integrator.setBeepEnabled(true);
+            integrator.setOrientationLocked(true);
+            integrator.initiateScan();
+        });
         v.findViewById(R.id.banner_bluetooth).setOnClickListener(b -> showBleUpcomingDialog());
 
         swipeRefresh.setOnRefreshListener(this::refreshData);
 
         return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() != null) {
+                handleScannedQrPayment(result.getContents());
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void handleScannedQrPayment(String rawData) {
+        String sessionId = null;
+        String amountStr = null;
+
+        try {
+            android.net.Uri uri = android.net.Uri.parse(rawData);
+            sessionId = uri.getQueryParameter("session_id");
+            amountStr = uri.getQueryParameter("amount");
+        } catch (Exception ignored) {}
+
+        if (sessionId == null || sessionId.isEmpty()) {
+            Toast.makeText(getContext(), "Неверный QR-код терминала RoPay", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String finalSessionId = sessionId;
+        String promptMsg = "Вы действительно хотите оплатить заказ";
+        if (amountStr != null && !amountStr.isEmpty()) {
+            promptMsg += " на сумму " + amountStr + " ₽?";
+        } else {
+            promptMsg += "?";
+        }
+
+        new AlertDialog.Builder(requireContext(), R.style.Theme_RoPay_Dialog)
+                .setTitle("Оплата в терминале RoPay")
+                .setMessage(promptMsg)
+                .setPositiveButton("Оплатить", (d, w) -> executeTerminalPayment(finalSessionId))
+                .setNegativeButton("Отмена", null)
+                .show();
+    }
+
+    private void executeTerminalPayment(String sessionId) {
+        if (currentUser == null) return;
+        ApiClient.getInstance().payTerminalSession(sessionId, currentUser.id, new ApiClient.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+                Toast.makeText(getContext(), "🎉 " + result, Toast.LENGTH_LONG).show();
+                refreshData();
+            }
+
+            @Override
+            public void onError(String error) {
+                new AlertDialog.Builder(requireContext(), R.style.Theme_RoPay_Dialog)
+                        .setTitle("Ошибка оплаты")
+                        .setMessage(error)
+                        .setPositiveButton("Понятно", null)
+                        .show();
+            }
+        });
     }
 
     @Override
