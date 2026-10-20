@@ -94,6 +94,10 @@ public class ApiClient {
         return instance;
     }
 
+    public OkHttpClient getHttpClient() {
+        return httpClient;
+    }
+
     private <T> void deliverSuccess(ApiCallback<T> callback, T result) {
         mainHandler.post(() -> callback.onSuccess(result));
     }
@@ -298,12 +302,66 @@ public class ApiClient {
                     return;
                 }
                 try {
-                    String respStr = response.body().string();
+                    String respStr = response.body() != null ? response.body().string() : "";
                     JsonObject obj = gson.fromJson(respStr, JsonObject.class);
-                    User u = gson.fromJson(obj.get("user"), User.class);
-                    deliverSuccess(callback, u);
+                    User u = null;
+                    if (obj != null && obj.has("user") && !obj.get("user").isJsonNull()) {
+                        u = gson.fromJson(obj.get("user"), User.class);
+                    } else if (obj != null) {
+                        u = gson.fromJson(obj, User.class);
+                    }
+                    if (u != null) {
+                        deliverSuccess(callback, u);
+                    } else {
+                        deliverError(callback, "Ошибка разбора профиля");
+                    }
                 } catch (Exception e) {
                     deliverError(callback, e.getMessage());
+                }
+            }
+        });
+    }
+
+    // ── Fetch User By Phone ──────────────────────────────────────────────────────
+    public void fetchUserByPhone(String phone, ApiCallback<User> callback) {
+        String cleanPhone = (phone != null) ? phone.trim().replace(" ", "").replace("-", "") : "";
+        try {
+            cleanPhone = java.net.URLEncoder.encode(cleanPhone, "UTF-8");
+        } catch (Exception ignored) {}
+
+        Request req = new Request.Builder()
+                .url(BASE_URL + "/api/client/by_phone?phone=" + cleanPhone)
+                .get()
+                .build();
+
+        httpClient.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                deliverError(callback, "Ошибка сети: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    deliverError(callback, "Клиент не найден");
+                    return;
+                }
+                try {
+                    String respStr = response.body() != null ? response.body().string() : "";
+                    JsonObject obj = gson.fromJson(respStr, JsonObject.class);
+                    User u = null;
+                    if (obj != null && obj.has("user") && !obj.get("user").isJsonNull()) {
+                        u = gson.fromJson(obj.get("user"), User.class);
+                    } else if (obj != null) {
+                        u = gson.fromJson(obj, User.class);
+                    }
+                    if (u != null) {
+                        deliverSuccess(callback, u);
+                    } else {
+                        deliverError(callback, "Ошибка парсинга профиля");
+                    }
+                } catch (Exception e) {
+                    deliverError(callback, "Ошибка обработки ответа: " + e.getMessage());
                 }
             }
         });

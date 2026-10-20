@@ -5,33 +5,70 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <ImageView
-        android:id="@+id/iv_story_full"
+    <!-- Media Container: Video or Photo -->
+    <FrameLayout
+        android:id="@+id/layout_media_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/iv_story_photo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter"
+            android:contentDescription="Story Image" />
+
+        <VideoView
+            android:id="@+id/vv_story_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/pb_story_loading"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="@color/mint" />
+    </FrameLayout>
+
+    <!-- Tap Touch Overlay for Navigation (Left = Prev, Right = Next, Long Press = Pause) -->
+    <LinearLayout
+        android:id="@+id/layout_touch_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:contentDescription="Story Image" />
+        android:orientation="horizontal">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:layout_gravity="bottom"
-        android:background="#AA000000" />
+        <View
+            android:id="@+id/touch_left_prev"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-    <!-- Top Progress Bar & Close -->
+        <View
+            android:id="@+id/touch_right_next"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2" />
+    </LinearLayout>
+
+    <!-- Top Controls: Segmented Bars + Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="12dp">
 
-        <ProgressBar
-            android:id="@+id/pb_story_timer"
-            style="?android:attr/progressBarStyleHorizontal"
+        <!-- Segmented Progress Bar Container -->
+        <LinearLayout
+            android:id="@+id/layout_progress_bars"
             android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:progressTint="@color/mint" />
+            android:layout_height="3dp"
+            android:orientation="horizontal" />
 
+        <!-- Header: Avatar + Title + Sound + Close -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,43 +76,91 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tv_story_viewer_title"
+            <FrameLayout
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_circle_avatar">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_bolt"
+                    app:tint="@color/mint" />
+            </FrameLayout>
+
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:text="Новости RoPay"
-                android:textColor="@color/white"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/tv_viewer_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RoPay Банк"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="История банка RoPay"
+                    android:textColor="#BFBFBF"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <!-- Sound toggle button (for videos) -->
+            <ImageView
+                android:id="@+id/btn_story_sound"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_keypad_button"
+                android:padding="8dp"
+                android:src="@drawable/ic_bolt"
+                android:visibility="gone"
+                app:tint="@color/white" />
+
+            <!-- Close button -->
             <ImageView
                 android:id="@+id/btn_story_close"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/bg_circle_avatar"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_keypad_button"
+                android:contentDescription="Close"
                 android:padding="8dp"
                 android:src="@drawable/ic_close"
-                app:tint="@color/white"
-                android:contentDescription="Close" />
+                app:tint="@color/white" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Bottom Description -->
+    <!-- Bottom Caption Text (Shadowed, like iOS) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingHorizontal="18dp"
+        android:paddingBottom="24dp">
 
         <TextView
-            android:id="@+id/tv_story_text"
+            android:id="@+id/tv_viewer_caption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:lineSpacingExtra="3dp"
+            android:shadowColor="#E6000000"
+            android:shadowDx="0"
+            android:shadowDy="2"
+            android:shadowRadius="8"
             android:text="Текст истории"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="15sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
 </FrameLayout>

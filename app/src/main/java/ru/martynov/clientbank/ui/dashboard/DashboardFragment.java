@@ -25,6 +25,7 @@ import ru.martynov.clientbank.data.local.SessionManager;
 import ru.martynov.clientbank.data.models.BankService;
 import ru.martynov.clientbank.data.models.BankStatus;
 import ru.martynov.clientbank.data.models.User;
+import ru.martynov.clientbank.ui.auth.PinLockActivity;
 import ru.martynov.clientbank.ui.browser.RoPayInAppBrowserActivity;
 import ru.martynov.clientbank.ui.story.StoryViewerActivity;
 import ru.martynov.clientbank.ui.transfer.TransferActivity;
@@ -168,6 +169,11 @@ public class DashboardFragment extends Fragment {
     }
 
     private void handleScannedQrPayment(String rawData) {
+        if (rawData == null || rawData.trim().isEmpty()) {
+            Toast.makeText(getContext(), "Пустой QR-код", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         String sessionId = null;
         String amountStr = null;
 
@@ -175,6 +181,9 @@ public class DashboardFragment extends Fragment {
             android.net.Uri uri = android.net.Uri.parse(rawData);
             sessionId = uri.getQueryParameter("session_id");
             amountStr = uri.getQueryParameter("amount");
+            if (sessionId == null && rawData.startsWith("pos_")) {
+                sessionId = rawData.trim();
+            }
         } catch (Exception ignored) {}
 
         if (sessionId == null || sessionId.isEmpty()) {
@@ -182,13 +191,15 @@ public class DashboardFragment extends Fragment {
             return;
         }
 
-        String finalSessionId = sessionId;
+        final String finalSessionId = sessionId;
         String promptMsg = "Вы действительно хотите оплатить заказ";
         if (amountStr != null && !amountStr.isEmpty()) {
             promptMsg += " на сумму " + amountStr + " ₽?";
         } else {
             promptMsg += "?";
         }
+
+        if (getContext() == null || !isAdded()) return;
 
         new AlertDialog.Builder(requireContext())
                 .setTitle("Оплата в терминале RoPay")
@@ -199,19 +210,57 @@ public class DashboardFragment extends Fragment {
     }
 
     private void executeTerminalPayment(String sessionId) {
-        if (currentUser == null) return;
+        if (!isAdded() || getContext() == null) return;
+
+        if (currentUser == null) {
+            currentUser = SessionManager.getInstance().getUser();
+        }
+
+        if (currentUser == null) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle("Требуется вход")
+                    .setMessage("Не удалось определить аккаунт для списания средств. Пожалуйста, выполните вход заново.")
+                    .setPositiveButton("Войти", (d, w) -> {
+                        startActivity(new Intent(getContext(), PinLockActivity.class));
+                        if (getActivity() != null) getActivity().finish();
+                    })
+                    .setNegativeButton("Отмена", null)
+                    .show();
+            return;
+        }
+
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(getContext());
+        progressDialog.setMessage("Проведение оплаты в терминале RoPay...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
         ApiClient.getInstance().payTerminalSession(sessionId, currentUser.id, new ApiClient.ApiCallback<String>() {
             @Override
             public void onSuccess(String result) {
-                Toast.makeText(getContext(), "🎉 " + result, Toast.LENGTH_LONG).show();
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                if (!isAdded() || getContext() == null) return;
+
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Оплата проведена! 🎉")
+                        .setMessage(result != null && !result.isEmpty() ? result : "Чек сформирован, средства успешно списаны.")
+                        .setPositiveButton("Отлично", (d, w) -> refreshData())
+                        .setCancelable(false)
+                        .show();
                 refreshData();
             }
 
             @Override
             public void onError(String error) {
+                if (progressDialog.isShowing()) {
+                    progressDialog.dismiss();
+                }
+                if (!isAdded() || getContext() == null) return;
+
                 new AlertDialog.Builder(requireContext())
                         .setTitle("Ошибка оплаты")
-                        .setMessage(error)
+                        .setMessage(error != null ? error : "Не удалось выполнить оплату")
                         .setPositiveButton("Понятно", null)
                         .show();
             }
@@ -219,8 +268,11 @@ public class DashboardFragment extends Fragment {
     }
 
     private void updateUserUI() {
+        if (currentUser == null) {
+            currentUser = SessionManager.getInstance().getUser();
+        }
         if (currentUser == null) return;
-        tvUserName.setText(currentUser.name != null ? currentUser.name : "Клиент");
+        tvUserName.setText(currentUser.name != null && !currentUser.name.isEmpty() ? currentUser.name : "Клиент");
         String initial = (currentUser.name != null && !currentUser.name.isEmpty()) ?
                 String.valueOf(currentUser.name.charAt(0)).toUpperCase() : "К";
         tvAvatar.setText(initial);
@@ -247,29 +299,60 @@ public class DashboardFragment extends Fragment {
     }
 
     private void refreshData() {
+        if (currentUser == null) {
+            currentUser = SessionManager.getInstance().getUser();
+        }
+
         if (currentUser != null) {
             ApiClient.getInstance().fetchProfile(currentUser.id, new ApiClient.ApiCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
+                    if (!isAdded()) return;
                     currentUser = user;
                     SessionManager.getInstance().saveUser(user);
                     updateUserUI();
                     swipeRefresh.setRefreshing(false);
+                    loadNotificationsCount();
                 }
 
                 @Override
                 public void onError(String error) {
-                    swipeRefresh.setRefreshing(false);
+                    if (isAdded()) {
+                        swipeRefresh.setRefreshing(false);
+                    }
                 }
             });
         } else {
-            swipeRefresh.setRefreshing(false);
+            String phone = SessionManager.getInstance().getSavedPhone();
+            if (phone != null && !phone.trim().isEmpty()) {
+                ApiClient.getInstance().fetchUserByPhone(phone, new ApiClient.ApiCallback<User>() {
+                    @Override
+                    public void onSuccess(User user) {
+                        if (!isAdded()) return;
+                        currentUser = user;
+                        SessionManager.getInstance().saveUser(user);
+                        updateUserUI();
+                        swipeRefresh.setRefreshing(false);
+                        loadNotificationsCount();
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        if (isAdded()) {
+                            swipeRefresh.setRefreshing(false);
+                        }
+                    }
+                });
+            } else {
+                swipeRefresh.setRefreshing(false);
+            }
         }
 
         // Load Statuses
         ApiClient.getInstance().fetchStatuses(new ApiClient.ApiCallback<List<BankStatus>>() {
             @Override
             public void onSuccess(List<BankStatus> result) {
+                if (!isAdded()) return;
                 loadedStatuses.clear();
                 if (result != null) loadedStatuses.addAll(result);
                 storiesAdapter.setItems(result);
@@ -283,6 +366,7 @@ public class DashboardFragment extends Fragment {
         ApiClient.getInstance().fetchServices(new ApiClient.ApiCallback<List<BankService>>() {
             @Override
             public void onSuccess(List<BankService> result) {
+                if (!isAdded()) return;
                 boolean hasServices = result != null && !result.isEmpty();
                 tvServicesTitle.setVisibility(hasServices ? View.VISIBLE : View.GONE);
                 servicesAdapter.setItems(result);

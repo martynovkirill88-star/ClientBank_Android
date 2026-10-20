@@ -1,36 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:layout_marginEnd="14dp">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fl_status_container"
+    android:layout_width="76dp"
+    android:layout_height="76dp"
+    android:layout_marginEnd="12dp"
+    android:background="@drawable/bg_status_square_unviewed"
+    android:padding="2dp">
 
-    <FrameLayout
-        android:id="@+id/fl_story_ring"
-        android:layout_width="66dp"
-        android:layout_height="66dp"
-        android:background="@drawable/bg_story_ring_unviewed">
+    <!-- Inner Card with clipped corners (16dp) -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="@color/bg_card">
 
-        <ImageView
-            android:id="@+id/iv_story_thumb"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:background="@drawable/bg_circle_avatar"
-            android:contentDescription="Story Thumbnail" />
-    </FrameLayout>
+            android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_story_title"
-        android:layout_width="68dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="Новости"
-        android:textColor="@color/white"
-        android:textSize="11sp" />
+            <!-- Thumbnail / Media Image -->
+            <ImageView
+                android:id="@+id/iv_story_thumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Status Media" />
 
-</LinearLayout>
+            <!-- Fallback Icon / Placeholder -->
+            <FrameLayout
+                android:id="@+id/fl_story_fallback"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/bg_card"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/iv_fallback_icon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_bolt"
+                    app:tint="@color/mint" />
+            </FrameLayout>
+
+            <!-- Bottom Gradient Scrim -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/scrim_bottom_dark" />
+
+            <!-- Status Title -->
+            <TextView
+                android:id="@+id/tv_story_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:padding="6dp"
+                android:text="RoPay"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+</FrameLayout>

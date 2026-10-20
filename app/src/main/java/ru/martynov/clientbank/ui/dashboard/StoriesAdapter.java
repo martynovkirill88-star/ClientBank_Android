@@ -1,5 +1,6 @@
 package ru.martynov.clientbank.ui.dashboard;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,8 +8,13 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import java.util.ArrayList;
 import java.util.List;
 import ru.martynov.clientbank.R;
@@ -44,22 +50,44 @@ public class StoriesAdapter extends RecyclerView.Adapter<StoriesAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         BankStatus item = items.get(position);
-        holder.tvTitle.setText(item.title != null ? item.title : "История");
+        holder.tvTitle.setText(item.title != null && !item.title.isEmpty() ? item.title : "RoPay");
 
         boolean viewed = SessionManager.getInstance().isStoryViewed(item.id);
-        holder.flRing.setBackgroundResource(viewed ? R.drawable.bg_story_ring_viewed : R.drawable.bg_story_ring_unviewed);
+        holder.flContainer.setBackgroundResource(viewed ? R.drawable.bg_status_square_viewed : R.drawable.bg_status_square_unviewed);
+        holder.itemView.setAlpha(viewed ? 0.75f : 1.0f);
 
         String url = item.mediaUrl != null ? item.mediaUrl : "";
-        if (!url.startsWith("http")) {
+        if (!url.isEmpty() && !url.startsWith("http")) {
             url = ApiClient.BASE_URL + url;
         }
 
-        Glide.with(holder.itemView.getContext())
-                .load(url)
-                .circleCrop()
-                .placeholder(R.drawable.ropay_logo)
-                .error(R.drawable.ropay_logo)
-                .into(holder.ivThumb);
+        holder.flFallback.setVisibility(View.GONE);
+        holder.ivThumb.setVisibility(View.VISIBLE);
+
+        if (!url.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(url)
+                    .centerCrop()
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            holder.flFallback.setVisibility(View.VISIBLE);
+                            holder.ivThumb.setVisibility(View.GONE);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            holder.flFallback.setVisibility(View.GONE);
+                            holder.ivThumb.setVisibility(View.VISIBLE);
+                            return false;
+                        }
+                    })
+                    .into(holder.ivThumb);
+        } else {
+            holder.flFallback.setVisibility(View.VISIBLE);
+            holder.ivThumb.setVisibility(View.GONE);
+        }
 
         holder.itemView.setOnClickListener(v -> listener.onStoryClick(item, position));
     }
@@ -70,14 +98,18 @@ public class StoriesAdapter extends RecyclerView.Adapter<StoriesAdapter.ViewHold
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        FrameLayout flRing;
+        FrameLayout flContainer;
         ImageView ivThumb;
+        FrameLayout flFallback;
+        ImageView ivFallbackIcon;
         TextView tvTitle;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
-            flRing = itemView.findViewById(R.id.fl_story_ring);
+            flContainer = itemView.findViewById(R.id.fl_status_container);
             ivThumb = itemView.findViewById(R.id.iv_story_thumb);
+            flFallback = itemView.findViewById(R.id.fl_story_fallback);
+            ivFallbackIcon = itemView.findViewById(R.id.iv_fallback_icon);
             tvTitle = itemView.findViewById(R.id.tv_story_title);
         }
     }

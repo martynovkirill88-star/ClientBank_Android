@@ -1,9 +1,12 @@
 package ru.martynov.clientbank;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import ru.martynov.clientbank.data.local.SessionManager;
+import ru.martynov.clientbank.ui.auth.PinLockActivity;
 import ru.martynov.clientbank.ui.dashboard.DashboardFragment;
 import ru.martynov.clientbank.ui.history.HistoryFragment;
 import ru.martynov.clientbank.ui.settings.SettingsFragment;
@@ -19,6 +22,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (SessionManager.getInstance().getUser() == null) {
+            String savedPhone = SessionManager.getInstance().getSavedPhone();
+            if (savedPhone == null || savedPhone.trim().isEmpty()) {
+                startActivity(new Intent(this, PinLockActivity.class));
+                finish();
+                return;
+            }
+        }
+
         setContentView(R.layout.activity_main);
 
         bottomNav = findViewById(R.id.bottom_navigation);
