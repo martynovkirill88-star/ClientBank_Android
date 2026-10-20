@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_marginEnd="14dp">
+
+    <FrameLayout
+        android:id="@+id/fl_story_ring"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:background="@drawable/bg_story_ring_unviewed">
+
+        <ImageView
+            android:id="@+id/iv_story_thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_circle_avatar"
+            android:contentDescription="Story Thumbnail" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/tv_story_title"
+        android:layout_width="68dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="Новости"
+        android:textColor="@color/white"
+        android:textSize="11sp" />
+
+</LinearLayout>
