@@ -53,6 +53,11 @@ public class RoPayInAppBrowserActivity extends AppCompatActivity {
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
 
+        // Lock Zoom & Pinch (Native App Experience)
+        settings.setSupportZoom(false);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
+
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int newProgress) {
@@ -74,6 +79,13 @@ public class RoPayInAppBrowserActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 progressBar.setVisibility(View.GONE);
+                String js = "javascript:(function() {" +
+                        "var meta = document.querySelector('meta[name=\"viewport\"]');" +
+                        "if (!meta) { meta = document.createElement('meta'); meta.name = 'viewport'; if (document.head) document.head.appendChild(meta); }" +
+                        "if (meta) { meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, shrink-to-fit=no'; }" +
+                        "document.body.style.touchAction = 'pan-x pan-y';" +
+                        "})()";
+                view.evaluateJavascript(js, null);
             }
         });
 
