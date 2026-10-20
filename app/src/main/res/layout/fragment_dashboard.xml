@@ -17,7 +17,7 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- Top Header Bar -->
+            <!-- Top Header Bar (GlassTopBar matching iOS 1-to-1) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="12dp">
+                    android:layout_marginStart="14dp">
 
                     <TextView
                         android:id="@+id/tv_user_name"
@@ -57,18 +57,40 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Клиент RoPay Bank"
-                        android:textColor="@color/mint"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
+                        android:text="Активный счёт RoPay"
+                        android:textColor="@color/text_muted"
+                        android:textSize="12sp" />
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/iv_header_logo"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/ropay_logo"
-                    android:contentDescription="RoPay Logo" />
+                <!-- Circular Notification Bell Button with Badge Counter -->
+                <FrameLayout
+                    android:id="@+id/btn_notifications"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:background="@drawable/bg_keypad_button">
+
+                    <ImageView
+                        android:id="@+id/iv_bell_icon"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_bell"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/tv_notif_badge"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="top|end"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:background="@drawable/bg_notif_badge"
+                        android:gravity="center"
+                        android:textColor="@color/white"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+                </FrameLayout>
             </LinearLayout>
 
             <!-- Stories / Statuses Carousel -->

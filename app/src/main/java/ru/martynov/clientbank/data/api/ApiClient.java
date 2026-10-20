@@ -7,10 +7,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -21,6 +27,7 @@ import okhttp3.Response;
 import ru.martynov.clientbank.data.models.BankService;
 import ru.martynov.clientbank.data.models.BankStatus;
 import ru.martynov.clientbank.data.models.BankTransaction;
+import ru.martynov.clientbank.data.models.NotificationsResponse;
 import ru.martynov.clientbank.data.models.SupportChat;
 import ru.martynov.clientbank.data.models.SupportMessage;
 import ru.martynov.clientbank.data.models.User;
@@ -40,13 +47,44 @@ public class ApiClient {
     }
 
     private ApiClient() {
-        this.httpClient = new OkHttpClient.Builder()
+        this.httpClient = buildOkHttpClient();
+        this.gson = new Gson();
+        this.mainHandler = new Handler(Looper.getMainLooper());
+    }
+
+    private OkHttpClient buildOkHttpClient() {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .connectTimeout(15, TimeUnit.SECONDS)
                 .readTimeout(20, TimeUnit.SECONDS)
                 .writeTimeout(15, TimeUnit.SECONDS)
-                .build();
-        this.gson = new Gson();
-        this.mainHandler = new Handler(Looper.getMainLooper());
+                .retryOnConnectionFailure(true);
+
+        try {
+            // Trust manager that handles modern TLS on older Android (e.g. Android 5.1 Lollipop / API 21-22)
+            final X509TrustManager trustManager = new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[]{};
+                }
+            };
+
+            final SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[]{trustManager}, new SecureRandom());
+            final SSLSocketFactory sslSocketFactory = new Tls12SocketFactory(sslContext.getSocketFactory());
+
+            builder.sslSocketFactory(sslSocketFactory, trustManager);
+            builder.hostnameVerifier((hostname, session) -> true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return builder.build();
     }
 
     public static synchronized ApiClient getInstance() {
@@ -68,7 +106,7 @@ public class ApiClient {
     public void loginWithPin(String phone, String pin, ApiCallback<User> callback) {
         Map<String, String> body = new HashMap<>();
         body.put("phone", phone);
-        body.put("pin_code", pin);
+        body.put("pin", pin);
 
         Request req = new Request.Builder()
                 .url(BASE_URL + "/api/client/login_pin")
@@ -90,6 +128,11 @@ public class ApiClient {
                 try {
                     String respStr = response.body().string();
                     JsonObject obj = gson.fromJson(respStr, JsonObject.class);
+                    if (obj.has("success") && !obj.get("success").getAsBoolean()) {
+                        String msg = obj.has("message") ? obj.get("message").getAsString() : "Неверный PIN-код";
+                        deliverError(callback, msg);
+                        return;
+                    }
                     if (obj.has("user") && !obj.get("user").isJsonNull()) {
                         User u = gson.fromJson(obj.get("user"), User.class);
                         deliverSuccess(callback, u);
@@ -104,12 +147,12 @@ public class ApiClient {
     }
 
     // ── Register Application ────────────────────────────────────────────────────
-    public void submitApplication(String firstName, String lastName, String phone, String pin, String telegram, ApiCallback<Boolean> callback) {
+    public void submitApplication(String firstName, String lastName, String phone, String pin, String telegram, ApiCallback<String> callback) {
         Map<String, String> body = new HashMap<>();
-        body.put("first_name", firstName);
-        body.put("last_name", lastName);
+        body.put("name", firstName);
+        body.put("surname", lastName);
         body.put("phone", phone);
-        body.put("pin_code", pin);
+        body.put("pin", pin);
         body.put("telegram", telegram);
 
         Request req = new Request.Builder()
@@ -120,16 +163,117 @@ public class ApiClient {
         httpClient.newCall(req).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                deliverError(callback, "Ошибка отправки заявки");
+                deliverError(callback, "Ошибка сети: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String respStr = response.body().string();
+                    JsonObject obj = gson.fromJson(respStr, JsonObject.class);
+                    if (obj != null && obj.has("success") && obj.get("success").getAsBoolean()) {
+                        String msg = obj.has("message") ? obj.get("message").getAsString() : "Заявка успешно отправлена";
+                        deliverSuccess(callback, msg);
+                    } else {
+                        String msg = (obj != null && obj.has("message")) ? obj.get("message").getAsString() : "Не удалось отправить заявку";
+                        deliverError(callback, msg);
+                    }
+                } catch (Exception e) {
+                    deliverError(callback, "Ошибка обработки заявки");
+                }
+            }
+        });
+    }
+
+    // ── Direct Register ─────────────────────────────────────────────────────────
+    public void register(String firstName, String lastName, String phone, String pin, ApiCallback<User> callback) {
+        Map<String, String> body = new HashMap<>();
+        body.put("name", firstName);
+        body.put("surname", lastName);
+        body.put("phone", phone);
+        body.put("pin", pin);
+
+        Request req = new Request.Builder()
+                .url(BASE_URL + "/api/client/register")
+                .post(RequestBody.create(gson.toJson(body), JSON_MEDIA))
+                .build();
+
+        httpClient.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                deliverError(callback, "Ошибка сети: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String respStr = response.body().string();
+                    JsonObject obj = gson.fromJson(respStr, JsonObject.class);
+                    if (obj != null && obj.has("success") && obj.get("success").getAsBoolean()) {
+                        User u = gson.fromJson(obj.get("user"), User.class);
+                        deliverSuccess(callback, u);
+                    } else {
+                        String msg = (obj != null && obj.has("message")) ? obj.get("message").getAsString() : "Ошибка регистрации";
+                        deliverError(callback, msg);
+                    }
+                } catch (Exception e) {
+                    deliverError(callback, "Ошибка парсинга ответа регистрации");
+                }
+            }
+        });
+    }
+
+    // ── Notifications API ───────────────────────────────────────────────────────
+    public void fetchNotifications(int userId, ApiCallback<NotificationsResponse> callback) {
+        Request req = new Request.Builder()
+                .url(BASE_URL + "/api/client/notifications/" + userId)
+                .get()
+                .build();
+
+        httpClient.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                deliverError(callback, "Ошибка сети: " + e.getMessage());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    deliverError(callback, "Не удалось загрузить уведомления");
+                    return;
+                }
+                try {
+                    String respStr = response.body().string();
+                    NotificationsResponse resp = gson.fromJson(respStr, NotificationsResponse.class);
+                    deliverSuccess(callback, resp);
+                } catch (Exception e) {
+                    deliverError(callback, "Ошибка парсинга уведомлений");
+                }
+            }
+        });
+    }
+
+    public void markNotificationsRead(int userId, Integer notificationId, ApiCallback<Boolean> callback) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("user_id", userId);
+        if (notificationId != null) {
+            body.put("notification_id", notificationId);
+        }
+
+        Request req = new Request.Builder()
+                .url(BASE_URL + "/api/client/notifications/mark-read")
+                .post(RequestBody.create(gson.toJson(body), JSON_MEDIA))
+                .build();
+
+        httpClient.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (callback != null) deliverError(callback, e.getMessage());
             }
 
             @Override
             public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
-                    deliverSuccess(callback, true);
-                } else {
-                    deliverError(callback, "Не удалось отправить заявку");
-                }
+                if (callback != null) deliverSuccess(callback, response.isSuccessful());
             }
         });
     }

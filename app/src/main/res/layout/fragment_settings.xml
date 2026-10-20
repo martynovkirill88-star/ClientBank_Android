@@ -10,36 +10,95 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Настройки"
             android:textColor="@color/white"
-            android:textSize="24sp"
+            android:textSize="26sp"
             android:textStyle="bold" />
 
-        <!-- User Profile Card -->
+        <!-- User Profile Header (Matching iOS SettingsView) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:background="@drawable/bg_circle_avatar">
+
+                <TextView
+                    android:id="@+id/tv_settings_avatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="К"
+                    android:textColor="@color/mint"
+                    android:textSize="36sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_settings_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="Кирилл Мартынов"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_settings_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="+7 999 123-45-67"
+                android:textColor="@color/text_muted"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <!-- ── SUPPORT & TELEGRAM BANNERS (Matching iOS & Terminal Banner) ── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="ПОМОЩЬ И СВЯЗЬ"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- 1. In-App Support Chat Banner -->
+        <LinearLayout
+            android:id="@+id/btn_open_support"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_card_rounded"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tv_settings_avatar"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_button_purple"
-                android:gravity="center"
-                android:text="К"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_button_purple">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_support"
+                    app:tint="@color/purple_light" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -49,42 +108,95 @@
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/tv_settings_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Кирилл Мартынов"
+                    android:text="Служба поддержки"
                     android:textColor="@color/white"
-                    android:textSize="16sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tv_settings_phone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:text="+7 999 123-45-67"
+                    android:text="Чат с банком и голосовой помощник"
                     android:textColor="@color/text_muted"
-                    android:textSize="13sp" />
+                    android:textSize="12sp" />
             </LinearLayout>
 
             <TextView
-                android:id="@+id/btn_copy_phone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_button_purple"
                 android:paddingHorizontal="10dp"
-                android:paddingVertical="6dp"
-                android:text="Копировать"
-                android:textColor="@color/mint"
+                android:paddingVertical="4dp"
+                android:text="24/7"
+                android:textColor="@color/purple_light"
                 android:textSize="11sp"
                 android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 2. Telegram Support Banner (Opens @RodVibeMeg) -->
+        <LinearLayout
+            android:id="@+id/btn_open_telegram"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_card_rounded"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_circle_avatar">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_telegram"
+                    app:tint="@color/telegram_blue" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="14dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Поддержка в Telegram"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@RodVibeMeg"
+                    android:textColor="@color/telegram_blue"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/text_muted" />
         </LinearLayout>
 
         <!-- Security Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
             android:text="БЕЗОПАСНОСТЬ"
             android:textColor="@color/text_muted"
             android:textSize="12sp"
@@ -93,7 +205,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_card_rounded"
             android:orientation="vertical"
             android:padding="16dp">
@@ -108,7 +220,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Вход по отпечатку / Face ID"
+                    android:text="Вход по отпечатку / биометрии"
                     android:textColor="@color/white"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -119,94 +231,6 @@
                     android:layout_height="wrap_content"
                     app:thumbTint="@color/mint" />
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="12dp"
-                android:background="@color/border" />
-
-            <LinearLayout
-                android:id="@+id/btn_change_pin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Изменить PIN-код"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/text_muted" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Support Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="ПОМОЩЬ И СВЯЗЬ"
-            android:textColor="@color/text_muted"
-            android:textSize="12sp"
-            android:textStyle="bold" />
-
-        <LinearLayout
-            android:id="@+id/btn_open_support"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_card_rounded"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:background="@drawable/bg_circle_avatar"
-                android:padding="8dp"
-                android:src="@drawable/ic_bolt"
-                app:tint="@color/mint" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Чат с поддержкой"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="Бот-помощник и операторы банка"
-                    android:textColor="@color/mint"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_chevron_right"
-                app:tint="@color/text_muted" />
         </LinearLayout>
 
         <!-- App Info & Logout -->
@@ -215,8 +239,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="32dp"
-            android:text="RoPay Android v1.0.22 (Build 22)"
+            android:layout_marginTop="36dp"
+            android:text="RoPay Android v1.0.24 (Build 24)"
             android:textColor="@color/text_muted"
             android:textSize="12sp" />
 

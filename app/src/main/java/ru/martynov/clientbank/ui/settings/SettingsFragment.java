@@ -1,9 +1,7 @@
 package ru.martynov.clientbank.ui.settings;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +16,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import ru.martynov.clientbank.R;
 import ru.martynov.clientbank.data.local.SessionManager;
 import ru.martynov.clientbank.data.models.User;
-import ru.martynov.clientbank.ui.auth.WelcomeActivity;
+import ru.martynov.clientbank.ui.auth.PinLockActivity;
 import ru.martynov.clientbank.ui.support.SupportChatActivity;
 
 public class SettingsFragment extends Fragment {
@@ -44,6 +42,9 @@ public class SettingsFragment extends Fragment {
             String initial = (u.name != null && !u.name.isEmpty()) ?
                     String.valueOf(u.name.charAt(0)).toUpperCase() : "К";
             tvAvatar.setText(initial);
+        } else {
+            String phone = SessionManager.getInstance().getSavedPhone();
+            tvPhone.setText(phone != null ? phone : "");
         }
 
         switchBio.setChecked(SessionManager.getInstance().isBiometricsEnabled());
@@ -52,35 +53,32 @@ public class SettingsFragment extends Fragment {
             Toast.makeText(getContext(), isChecked ? "Биометрия включена" : "Биометрия отключена", Toast.LENGTH_SHORT).show();
         });
 
-        v.findViewById(R.id.btn_copy_phone).setOnClickListener(b -> {
-            if (u != null && u.phone != null && getContext() != null) {
-                ClipboardManager clipboard = (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("RoPay Phone", u.phone);
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(getContext(), "Номер скопирован: " + u.phone, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        v.findViewById(R.id.btn_change_pin).setOnClickListener(b -> {
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Изменение PIN-кода")
-                    .setMessage("Функция изменения PIN-кода будет доступна в следующем обновлении.")
-                    .setPositiveButton("OK", null)
-                    .show();
-        });
-
+        // 1. In-App Support Chat
         v.findViewById(R.id.btn_open_support).setOnClickListener(b -> {
             Intent intent = new Intent(getContext(), SupportChatActivity.class);
             startActivity(intent);
         });
 
+        // 2. Telegram Support Button (@RodVibeMeg)
+        v.findViewById(R.id.btn_open_telegram).setOnClickListener(b -> {
+            try {
+                Intent tgIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("tg://resolve?domain=RodVibeMeg"));
+                startActivity(tgIntent);
+            } catch (Exception e) {
+                Intent webIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/RodVibeMeg"));
+                startActivity(webIntent);
+            }
+        });
+
+        // 3. Logout
         v.findViewById(R.id.btn_logout).setOnClickListener(b -> {
+            if (getContext() == null) return;
             new AlertDialog.Builder(requireContext())
                     .setTitle("Выход из системы")
                     .setMessage("Вы действительно хотите выйти из своего аккаунта?")
                     .setPositiveButton("Выйти", (dialog, which) -> {
                         SessionManager.getInstance().logout();
-                        Intent intent = new Intent(getContext(), WelcomeActivity.class);
+                        Intent intent = new Intent(getContext(), PinLockActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                     })

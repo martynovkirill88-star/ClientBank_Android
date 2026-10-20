@@ -11,6 +11,7 @@ public class SessionManager {
     private static final String PREF_NAME = "ropay_prefs";
     private static final String KEY_USER = "current_user";
     private static final String KEY_PIN = "user_pin";
+    private static final String KEY_PHONE = "bank_user_phone";
     private static final String KEY_BIOMETRIC = "biometrics_enabled";
     private static final String KEY_VIEWED_STORIES = "viewed_stories";
 
@@ -35,6 +36,9 @@ public class SessionManager {
 
     public void saveUser(User user) {
         prefs.edit().putString(KEY_USER, gson.toJson(user)).apply();
+        if (user != null && user.phone != null && !user.phone.isEmpty()) {
+            savePhone(user.phone);
+        }
     }
 
     public User getUser() {
@@ -45,6 +49,21 @@ public class SessionManager {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public void savePhone(String phone) {
+        prefs.edit().putString(KEY_PHONE, phone).apply();
+    }
+
+    public String getSavedPhone() {
+        String p = prefs.getString(KEY_PHONE, "");
+        if ((p == null || p.isEmpty())) {
+            User u = getUser();
+            if (u != null && u.phone != null) {
+                return u.phone;
+            }
+        }
+        return p != null ? p : "";
     }
 
     public void savePin(String pin) {

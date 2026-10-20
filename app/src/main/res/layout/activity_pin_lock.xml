@@ -1,135 +1,358 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:background="@color/bg_dark">
 
-    <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginTop="40dp"
-        android:src="@drawable/ropay_logo"
-        android:contentDescription="RoPay Logo" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="RoPay Bank"
-        android:textColor="@color/white"
-        android:textSize="22sp"
-        android:textStyle="bold" />
-
-    <TextView
-        android:id="@+id/tv_pin_prompt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Введите PIN-код для входа"
-        android:textColor="@color/text_muted"
-        android:textSize="14sp" />
-
-    <!-- 4 PIN Dots -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:orientation="horizontal">
-
-        <View
-            android:id="@+id/dot_1"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_circle_avatar" />
-
-        <View
-            android:id="@+id/dot_2"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_circle_avatar" />
-
-        <View
-            android:id="@+id/dot_3"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_circle_avatar" />
-
-        <View
-            android:id="@+id/dot_4"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/bg_circle_avatar" />
-    </LinearLayout>
-
-    <View
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <!-- Numpad Grid -->
-    <GridLayout
-        android:id="@+id/grid_numpad"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:rowCount="4"
-        android:layout_marginBottom="24dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="36dp"
+            android:paddingBottom="20dp">
 
-        <!-- 1 to 9 -->
-        <TextView android:id="@+id/btn_key_1" style="@style/PinKey" android:text="1" />
-        <TextView android:id="@+id/btn_key_2" style="@style/PinKey" android:text="2" />
-        <TextView android:id="@+id/btn_key_3" style="@style/PinKey" android:text="3" />
+            <!-- App Icon & Logo -->
+            <ImageView
+                android:id="@+id/iv_app_logo"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_card_rounded"
+                android:padding="8dp"
+                android:src="@drawable/ropay_logo"
+                android:contentDescription="RoPay Logo" />
 
-        <TextView android:id="@+id/btn_key_4" style="@style/PinKey" android:text="4" />
-        <TextView android:id="@+id/btn_key_5" style="@style/PinKey" android:text="5" />
-        <TextView android:id="@+id/btn_key_6" style="@style/PinKey" android:text="6" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="RoPay"
+                android:textColor="@color/white"
+                android:textSize="32sp"
+                android:textStyle="bold" />
 
-        <TextView android:id="@+id/btn_key_7" style="@style/PinKey" android:text="7" />
-        <TextView android:id="@+id/btn_key_8" style="@style/PinKey" android:text="8" />
-        <TextView android:id="@+id/btn_key_9" style="@style/PinKey" android:text="9" />
+            <!-- Phone status / instruction pill -->
+            <TextView
+                android:id="@+id/tv_phone_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_status_pill"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="6dp"
+                android:text="Введите ПИН-код или зарегистрируйтесь"
+                android:textColor="@color/mint"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-        <!-- Biometrics, 0, Backspace -->
-        <ImageView
-            android:id="@+id/btn_key_bio"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_circle_avatar"
-            android:padding="22dp"
-            android:src="@drawable/ic_lock"
-            app:tint="@color/mint"
-            android:contentDescription="Biometrics" />
+            <!-- 4 PIN Dots -->
+            <LinearLayout
+                android:id="@+id/layout_pin_dots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:orientation="horizontal">
 
-        <TextView android:id="@+id/btn_key_0" style="@style/PinKey" android:text="0" />
+                <View
+                    android:id="@+id/dot_1"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/bg_circle_avatar" />
 
-        <ImageView
-            android:id="@+id/btn_key_backspace"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/bg_circle_avatar"
-            android:padding="22dp"
-            android:src="@drawable/ic_close"
-            app:tint="@color/white"
-            android:contentDescription="Backspace" />
-    </GridLayout>
+                <View
+                    android:id="@+id/dot_2"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/bg_circle_avatar" />
 
-    <TextView
-        android:id="@+id/btn_pin_logout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Войти по номеру телефона"
-        android:textColor="@color/mint"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+                <View
+                    android:id="@+id/dot_3"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/bg_circle_avatar" />
 
-</LinearLayout>
+                <View
+                    android:id="@+id/dot_4"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/bg_circle_avatar" />
+            </LinearLayout>
+
+            <!-- Error text message -->
+            <TextView
+                android:id="@+id/tv_pin_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/danger"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:visibility="invisible" />
+
+            <ProgressBar
+                android:id="@+id/pb_pin_loading"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginTop="6dp"
+                android:indeterminateTint="@color/mint"
+                android:visibility="gone" />
+
+            <!-- Numeric Keypad 4x3 (Identical to iOS Liquid Glass Keypad) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <!-- Row 1: 1 2 3 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btn_key_1"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="1"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_2"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="2"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_3"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="3"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Row 2: 4 5 6 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btn_key_4"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="4"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_5"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="5"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_6"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="6"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Row 3: 7 8 9 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btn_key_7"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="7"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_8"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="8"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_9"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="9"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Row 4: C 0 DEL -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/btn_key_clear"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="C"
+                        android:textColor="@color/mint"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/btn_key_0"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button"
+                        android:gravity="center"
+                        android:text="0"
+                        android:textColor="@color/white"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:id="@+id/btn_key_backspace"
+                        android:layout_width="76dp"
+                        android:layout_height="76dp"
+                        android:layout_margin="8dp"
+                        android:background="@drawable/bg_keypad_button">
+
+                        <ImageView
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="Backspace"
+                            android:src="@drawable/ic_backspace"
+                            app:tint="@color/white" />
+                    </FrameLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Biometrics Button -->
+            <LinearLayout
+                android:id="@+id/btn_biometric_login"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_card_secondary_rounded"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_fingerprint"
+                    app:tint="@color/mint" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Войти по отпечатку"
+                    android:textColor="@color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Footer Links (Matching iOS: Регистрация and Сменить номер) -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/btn_footer_register"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="Регистрация"
+                    android:textColor="@color/mint"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="16dp"
+                    android:layout_height="1dp" />
+
+                <TextView
+                    android:id="@+id/btn_footer_switch_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:text="Сменить номер"
+                    android:textColor="@color/text_muted"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

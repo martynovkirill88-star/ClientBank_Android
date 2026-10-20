@@ -38,6 +38,9 @@ public class DashboardFragment extends Fragment {
     private RecyclerView rvStories;
     private RecyclerView rvServices;
     private TextView tvServicesTitle;
+    private View btnNotifications;
+    private ImageView ivBellIcon;
+    private TextView tvNotifBadge;
 
     private StoriesAdapter storiesAdapter;
     private ServicesAdapter servicesAdapter;
@@ -59,9 +62,14 @@ public class DashboardFragment extends Fragment {
         rvStories = v.findViewById(R.id.rv_stories);
         rvServices = v.findViewById(R.id.rv_services);
         tvServicesTitle = v.findViewById(R.id.tv_services_title);
+        btnNotifications = v.findViewById(R.id.btn_notifications);
+        ivBellIcon = v.findViewById(R.id.iv_bell_icon);
+        tvNotifBadge = v.findViewById(R.id.tv_notif_badge);
 
         currentUser = SessionManager.getInstance().getUser();
         updateUserUI();
+
+        btnNotifications.setOnClickListener(b -> showNotificationsSheet());
 
         // Setup Stories List
         rvStories.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -105,7 +113,46 @@ public class DashboardFragment extends Fragment {
 
         swipeRefresh.setOnRefreshListener(this::refreshData);
 
+        loadNotificationsCount();
+
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        currentUser = SessionManager.getInstance().getUser();
+        updateUserUI();
+        refreshData();
+        loadNotificationsCount();
+    }
+
+    private void showNotificationsSheet() {
+        NotificationsBottomSheetDialogFragment sheet = new NotificationsBottomSheetDialogFragment();
+        sheet.setOnNotificationsDismissListener(this::loadNotificationsCount);
+        sheet.show(getChildFragmentManager(), "NotificationsSheet");
+    }
+
+    private void loadNotificationsCount() {
+        if (currentUser == null) return;
+        ApiClient.getInstance().fetchNotifications(currentUser.id, new ApiClient.ApiCallback<ru.martynov.clientbank.data.models.NotificationsResponse>() {
+            @Override
+            public void onSuccess(ru.martynov.clientbank.data.models.NotificationsResponse res) {
+                if (getContext() == null || tvNotifBadge == null) return;
+                int count = (res != null) ? res.unreadCount : 0;
+                if (count > 0) {
+                    tvNotifBadge.setVisibility(View.VISIBLE);
+                    tvNotifBadge.setText(count > 99 ? "99+" : String.valueOf(count));
+                    ivBellIcon.setColorFilter(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.mint));
+                } else {
+                    tvNotifBadge.setVisibility(View.GONE);
+                    ivBellIcon.setColorFilter(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.white));
+                }
+            }
+
+            @Override
+            public void onError(String error) { }
+        });
     }
 
     @Override
@@ -169,12 +216,6 @@ public class DashboardFragment extends Fragment {
                         .show();
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshData();
     }
 
     private void updateUserUI() {
@@ -250,5 +291,7 @@ public class DashboardFragment extends Fragment {
             @Override
             public void onError(String error) { }
         });
+
+        loadNotificationsCount();
     }
 }

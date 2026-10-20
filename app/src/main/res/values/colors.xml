@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg_dark">#0B0E14</color>
-    <color name="bg_dark_secondary">#111622</color>
-    <color name="bg_card">#151B26</color>
-    <color name="bg_card_secondary">#1C2333</color>
+    <color name="bg_dark">#0D1117</color>
+    <color name="bg_dark_secondary">#12161D</color>
+    <color name="bg_card">#161B22</color>
+    <color name="bg_card_secondary">#1F242C</color>
+    <color name="bg_card_subtle">#21262D</color>
     
     <color name="mint">#00E599</color>
     <color name="mint_light">#33FFB8</color>
@@ -16,16 +17,19 @@
     
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#8E9AA8</color>
-    <color name="text_muted">#606F80</color>
+    <color name="text_muted">#8B949E</color>
     
     <color name="gold">#FFD700</color>
     <color name="gold_trans">#29FFD700</color>
     
-    <color name="danger">#FF4D4D</color>
-    <color name="danger_trans">#29FF4D4D</color>
+    <color name="danger">#FF453A</color>
+    <color name="danger_trans">#29FF453A</color>
     
-    <color name="border">#1F2937</color>
-    <color name="border_light">#2A3649</color>
+    <color name="telegram_blue">#229ED9</color>
+    <color name="telegram_blue_trans">#25229ED9</color>
+
+    <color name="border">#30363D</color>
+    <color name="border_light">#3D444D</color>
     
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
