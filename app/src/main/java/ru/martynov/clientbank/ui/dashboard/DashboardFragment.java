@@ -143,7 +143,7 @@ public class DashboardFragment extends Fragment {
             promptMsg += "?";
         }
 
-        new AlertDialog.Builder(requireContext(), R.style.Theme_RoPay_Dialog)
+        new AlertDialog.Builder(requireContext())
                 .setTitle("Оплата в терминале RoPay")
                 .setMessage(promptMsg)
                 .setPositiveButton("Оплатить", (d, w) -> executeTerminalPayment(finalSessionId))
@@ -162,7 +162,7 @@ public class DashboardFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                new AlertDialog.Builder(requireContext(), R.style.Theme_RoPay_Dialog)
+                new AlertDialog.Builder(requireContext())
                         .setTitle("Ошибка оплаты")
                         .setMessage(error)
                         .setPositiveButton("Понятно", null)
